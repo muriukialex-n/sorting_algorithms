@@ -10,7 +10,10 @@
  */
 int partition_h(int *array, int first, int last, size_t size)
 {
-	int pivot = array[last], i = first - 1, j = last + 1, aux;
+	int pivot = array[last];
+	int i = first - 1;
+	int j = last + 1;
+	int aux;
 
 	while (1)
 	{
@@ -22,15 +25,13 @@ int partition_h(int *array, int first, int last, size_t size)
 			j--;
 		} while (array[j] > pivot);
 
-		if (j < i)
-			return (j);
-		if (array[i] > array[j])
-		{
-			aux = array[i];
-			array[i] = array[j];
-			array[j] = aux;
-			print_array(array, size);
-		}
+		if (j <= i)
+			return (i);
+
+		aux = array[i];
+		array[i] = array[j];
+		array[j] = aux;
+		print_array(array, size);
 	}
 }
 
@@ -48,14 +49,14 @@ void qsh(int *array, int first, int last, size_t size)
 	if (first < last)
 	{
 		pivot = partition_h(array, first, last, size);
-		qsh(array, first, pivot, size);
-		qsh(array, pivot + 1, last, size);
+		qsh(array, first, pivot - 1, size);
+		qsh(array, pivot, last, size);
 	}
 }
 
 /**
  * quick_sort_hoare - sorts an array of integers using the Quick
- * sort hoare algorithm  in ascending order
+ * sort hoare algorithm in ascending order
  * @array: array to sort
  * @size: array size
  */
