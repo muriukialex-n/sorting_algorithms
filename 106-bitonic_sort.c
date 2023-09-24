@@ -1,74 +1,120 @@
 #include "sort.h"
 #include <stdio.h>
-/**
- * swap - Swap two elements in the array.
- * @arr: The array.
- * @i: Index of the first element.
- * @j: Index of the second element.
- */
-void swap(int *arr, int i, int j)
-{
-	int temp = arr[i];
 
-	arr[i] = arr[j];
-	arr[j] = temp;
+/**
+ * printcheck - print a range
+ * @array: The array to print
+ * @r1: Less range
+ * @r2: Final range
+ * Return: Nothing
+ */
+void printcheck(int *array, int r1, int r2)
+{
+	int i;
+
+	for (i = r1; i <= r2; i++)
+	{
+		if (i > r1)
+			printf(", ");
+		printf("%d", array[i]);
+	}
+	printf("\n");
 }
 /**
- * bitonic_merge - Recursively merge the bitonic sequences.
- * @arr: The array.
- * @low: Starting index of the subarray.
- * @nelemnt: Number of elements in the subarray.
- * @order: 1 for ascending order, 0 for descending order.
+ * _swap - swap two elements in an array
+ * @array: THe array to change the values
+ * @i: A index
+ * @j: Another index
+ * @dir: Direction of the array
+ * Return: Nothing
  */
-void bitonic_merge(int *arr, int low, int nelemnt, int order)
+void _swap(int *array, int i, int j, int dir)
 {
-	if (nelemnt > 1)
-	{
-		int mid = nelemnt / 2;
+	int tmp;
 
-		printf("Merging [%i/%i] (%s):\n", nelemnt, nelemnt, order ? "UP" : "DOWN");
-		print_array(arr + low, nelemnt);
-		for (int i = low; i < low + mid; i++)
+	if (dir == (array[i] > array[j]))
+	{
+		tmp = array[i];
+		array[i] = array[j];
+		array[j] = tmp;
+	}
+}
+/**
+ * bitonic_merge - swap the elements to sort
+ * @array: Array to sort
+ * @low: The low element in the range to sort
+ * @size: The size of the range to sort
+ * @dir: Indicate which half are manage
+ * @r_size: The size of the all array
+ * Return: Nothing
+ */
+void bitonic_merge(int *array, int low, int size, int dir, const int r_size)
+{
+	int k = size, i = low;
+
+	if (size > 1)
+	{
+		k = size / 2;
+
+		for (i = low; i < low + k; i++)
+			_swap(array, i, i + k, dir);
+
+		bitonic_merge(array, low, k, dir, r_size);
+		bitonic_merge(array, low + k, k, dir, r_size);
+	}
+}
+/**
+ * _sort - segmentate the array
+ * @array: The array to sort
+ * @low: The lowest element in each range
+ * @size: Size of the range to sort
+ * @dir: Indicate which half are manage
+ * @r_size: The size of the all array
+ * Return: Nothing
+ */
+void _sort(int *array, int low, int size, int dir, const int r_size)
+{
+	int k = size;
+
+	if (size > 1)
+	{
+		if (dir == 1)
+			printf("Merging [%d/%d] (UP):\n", size, r_size);
+		if (dir == 0)
+			printf("Merging [%d/%d] (DOWN):\n", size, r_size);
+		printcheck(array, low, low + k - 1);
+
+		k = size / 2;
+		_sort(array, low, k, 1, r_size);
+
+		_sort(array, low + k, k, 0, r_size);
+
+		bitonic_merge(array, low, size, dir, r_size);
+		if (dir == 1)
 		{
-			if ((arr[i] > arr[i + mid]) == order)
-			{
-				swap(arr, i, i + mid);
-			}
+			printf("Result [%d/%d] (UP):\n", size, r_size);
+			printcheck(array, low, low + 2 * k - 1);
 		}
-		bitonic_merge(arr, low, mid, order);
-		bitonic_merge(arr, low + mid, mid, order);
+		if (dir == 0)
+		{
+			printf("Result [%d/%d] (DOWN):\n", size, r_size);
+			printcheck(array, low, low + 2 * k - 1);
+		}
 	}
 }
 /**
- * bitonic_sort_recursive - Recursive function for Bitonic Sort.
- * @arr: The array.
- * @low: Starting index of the subarray.
- * @nelemnt: Number of elements in the subarray.
- * @order: 1 for ascending order, 0 for descending order.
- */
-void bitonic_sort_recursive(int *arr, int low, int nelemnt, int order)
-{
-	if (nelemnt > 1)
-	{
-		int mid = nelemnt / 2;
-
-		bitonic_sort_recursive(arr, low, mid, 1);
-		bitonic_sort_recursive(arr, low + mid, mid, 0);
-		bitonic_merge(arr, low, nelemnt, order);
-		printf("Result [%i/%i] (%s):\n", nelemnt, nelemnt, order ? "UP" : "DOWN");
-		print_array(arr + low, nelemnt);
-	}
-}
-/**
- * bitonic_sort - Sorts an array of integers using Bitonic Sort.
- * @array: The array.
- * @size: Size of the array.
+ * bitonic_sort - call the sort function
+ * @array: The array to sort
+ * @size: Size of the array
+ * Return: Nothing
  */
 void bitonic_sort(int *array, size_t size)
 {
-	if (!array || size < 2)
-	{
+	int up = 1;
+	const int r_size = (int)size;
+
+	if (size < 2 || !array)
 		return;
-	}
-	bitonic_sort_recursive(array, 0, size, 1);
+
+	_sort(array, 0, (int)size, up, r_size);
 }
